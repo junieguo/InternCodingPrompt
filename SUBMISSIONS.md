@@ -15,7 +15,7 @@ Before submitting, make sure you:
 - Run the application locally
 - Run the unit tests successfully
 - Commit all relevant changes to your fork
-- Push your final branch to GitHub
+- Push your final branch to YOUR GitHub forked repository.
 
 ## 3. Prepare Your Submission
 

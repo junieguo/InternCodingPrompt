@@ -69,6 +69,10 @@ Ensure all four CRUD operations are properly implemented in FastAPI:
 - **Update**: PUT /tasks/<task_id>
 - **Delete**: DELETE /tasks/<task_id>
 
+### 5. Setup GitHub Actions
+
+Setup a GitHub Actions workflow to run unit tests with code coverage reporting on push and pull request.
+
 ## Requirements
 
 - Python 3.11 or higher
@@ -84,7 +88,7 @@ Ensure all four CRUD operations are properly implemented in FastAPI:
 2. `pyproject.toml` - Project configuration and dependencies (already created)
 3. Updated `Dockerfile` - Container configuration
 4. Updated `README.md` - Clear instructions on how to run the application
-5. Setup Github Actions workflow to run unit tests on push and pull request
+5. `.github/workflows/test.yml` - GitHub Actions workflow to run unit tests with code coverage reporting on push and pull request
 
 ## Submission
 
