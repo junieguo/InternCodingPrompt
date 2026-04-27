@@ -84,6 +84,11 @@ Ensure all four CRUD operations are properly implemented in FastAPI:
 2. `pyproject.toml` - Project configuration and dependencies (already created)
 3. Updated `Dockerfile` - Container configuration
 4. Updated `README.md` - Clear instructions on how to run the application
+5. Setup Github Actions workflow to run unit tests on push and pull request
+
+## Submission
+
+See [`SUBMISSIONS.md`](./SUBMISSIONS.md) for instructions on how to fork the repository and submit your completed exercise.
 
 ## Testing Your Implementation
 
@@ -150,5 +155,3 @@ To run the tests:
 uv sync --dev
 uv run pytest
 ```
-
-Good luck with your migration!
