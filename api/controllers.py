@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from flask import jsonify
+from flask import jsonify, request
 
 # In-memory storage for tasks
 tasks = {}
@@ -19,47 +19,47 @@ def get_task(task_id):
     return jsonify({"error": "Task not found"}), 404
 
 
-def create_task(request):
+def create_task():
     """Create: Create a new task"""
-    data = request.get_json()
-    
-    if not data or 'title' not in data:
+    data = request.get_json(silent=True)
+
+    if data is None or "title" not in data:
         return jsonify({"error": "Title is required"}), 400
-    
+
     task_id = str(uuid.uuid4())
     task = {
         "id": task_id,
-        "title": data['title'],
-        "description": data.get('description', ''),
+        "title": data["title"],
+        "description": data.get("description", ""),
         "completed": False,
-        "created_at": datetime.utcnow().isoformat()
+        "created_at": datetime.utcnow().isoformat(),
     }
-    
+
     tasks[task_id] = task
     return jsonify(task), 201
 
 
-def update_task(request, task_id):
+def update_task(task_id):
     """Update: Update an existing task"""
     task = tasks.get(task_id)
     if not task:
         return jsonify({"error": "Task not found"}), 404
-    
-    data = request.get_json()
-    if not data:
+
+    data = request.get_json(silent=True)
+    if data is None:
         return jsonify({"error": "No data provided"}), 400
-    
+
     # Update task fields
-    if 'title' in data:
-        task['title'] = data['title']
-    if 'description' in data:
-        task['description'] = data['description']
-    if 'completed' in data:
-        task['completed'] = data['completed']
-    
-    task['updated_at'] = datetime.utcnow().isoformat()
+    if "title" in data:
+        task["title"] = data["title"]
+    if "description" in data:
+        task["description"] = data["description"]
+    if "completed" in data:
+        task["completed"] = data["completed"]
+
+    task["updated_at"] = datetime.utcnow().isoformat()
     tasks[task_id] = task
-    
+
     return jsonify(task), 200
 
 
@@ -68,7 +68,7 @@ def delete_task(task_id):
     task = tasks.get(task_id)
     if not task:
         return jsonify({"error": "Task not found"}), 404
-    
+
     del tasks[task_id]
     return jsonify({"message": "Task deleted successfully"}), 200
 

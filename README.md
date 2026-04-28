@@ -107,26 +107,26 @@ After completing the migration, verify your implementation by:
 
 ```bash
 # Create a task
-curl -X POST http://localhost:8000/tasks \
+curl -X POST http://localhost:5000/tasks \
   -H "Content-Type: application/json" \
   -d '{"title": "Complete migration", "description": "Migrate Flask to FastAPI"}'
 
 # Get all tasks
-curl http://localhost:8000/tasks
+curl http://localhost:5000/tasks
 
 # Get a specific task
-curl http://localhost:8000/tasks/{task_id}
+curl http://localhost:5000/tasks/{task_id}
 
 # Update a task
-curl -X PUT http://localhost:8000/tasks/{task_id} \
+curl -X PUT http://localhost:5000/tasks/{task_id} \
   -H "Content-Type: application/json" \
   -d '{"completed": true}'
 
 # Delete a task
-curl -X DELETE http://localhost:8000/tasks/{task_id}
+curl -X DELETE http://localhost:5000/tasks/{task_id}
 
 # Health check
-curl http://localhost:8000/health
+curl http://localhost:5000/health
 ```
 
 ## Additional Considerations
