@@ -4,12 +4,16 @@ version = "0.1.0"
 description = "Flask to FastAPI migration project"
 requires-python = ">=3.11"
 dependencies = [
-    "flask==3.0.0"
+    "fastapi>=0.136.1",
+    "flask==3.0.0",
+    "uvicorn>=0.46.0",
 ]
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pytest",
+    "pytest-cov>=7.1.0",
 ]
 
 [tool.setuptools.package-dir]
