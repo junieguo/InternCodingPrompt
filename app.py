@@ -1,10 +1,14 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from datetime import datetime
 import uuid
-import json
+from api.models import TaskCreate, TaskUpdate, TaskResponse
 
-app = FastAPI()
+app = FastAPI(
+    title="Task Management API",
+    version="1.0.0"
+)
 
 # Add "Flask-like" config
 class FlaskConfig:
@@ -18,6 +22,13 @@ class FlaskConfig:
         self._config[key] = value
 
 app.config = FlaskConfig()
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={"error": "Invalid request data"}
+    )
 
 # Add test_client method for testing
 class FlaskCompatibleResponse:
@@ -74,97 +85,72 @@ app.test_client = get_test_client
 tasks = {}
 
 # Helper
-def response(data, status=200):
-    return JSONResponse(
-        content=data,
-        status_code=status
-    )
-
+def create_response(data, status_code=200):
+    return JSONResponse(content=data, status_code=status_code)
 
 # Routes
 
-@app.get("/tasks")
+@app.get("/tasks", response_model=list[TaskResponse], status_code=status.HTTP_200_OK)
 async def get_tasks():
-    return response(list(tasks.values()))
+    """Get all tasks"""
+    return create_response(list(tasks.values()))
 
-@app.get("/tasks/{task_id}")
+@app.get("/tasks/{task_id}", response_model=TaskResponse, status_code=status.HTTP_200_OK)
 async def get_task(task_id: str):
+    """Get a specific task by ID"""
     task = tasks.get(task_id)
-
     if not task:
-        return response({"error": "Task not found"}, 404)
+        return create_response({"error": "Task not found"}, status.HTTP_404_NOT_FOUND)
+    return create_response(task)
 
-    return response(task)
-
-@app.post("/tasks")
-async def create_task(request: Request):
-    try:
-        data = await request.json()
-    except:
-        return response({"error": "Invalid JSON"}, 400)
-
-    if not data or "title" not in data:
-        return response({"error": "Title is required"}, 400)
-
+@app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
+async def create_task(task_data: TaskCreate):
+    """Create a new task"""
     task_id = str(uuid.uuid4())
-
+    now = datetime.utcnow().isoformat()
+    
     task = {
         "id": task_id,
-        "title": data["title"],
-        "description": data.get("description", ""),
+        "title": task_data.title,
+        "description": task_data.description or "",
         "completed": False,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": now,
+        "updated_at": None
     }
-
+    
     tasks[task_id] = task
+    return create_response(task, status.HTTP_201_CREATED)
 
-    return response(task, 201)
-
-@app.put("/tasks/{task_id}")
-async def update_task(task_id: str, request: Request):
+@app.put("/tasks/{task_id}", response_model=TaskResponse, status_code=status.HTTP_200_OK)
+async def update_task(task_id: str, task_data: TaskUpdate):
+    """Update an existing task"""
     task = tasks.get(task_id)
-
     if not task:
-        return response({"error": "Task not found"}, 404)
-
-    try:
-        data = await request.json()
-    except:
-        return response({"error": "Invalid JSON"}, 400)
-
-    if data is None:
-        return response({"error": "No data provided"}, 400)
-
-    if "title" in data:
-        task["title"] = data["title"]
-
-    if "description" in data:
-        task["description"] = data["description"]
-
-    if "completed" in data:
-        task["completed"] = data["completed"]
-
+        return create_response({"error": "Task not found"}, status.HTTP_404_NOT_FOUND)
+    
+    update_data = task_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        if value is not None:
+            task[key] = value
+    
     task["updated_at"] = datetime.utcnow().isoformat()
-
     tasks[task_id] = task
+    
+    return create_response(task)
 
-    return response(task)
-
-@app.delete("/tasks/{task_id}")
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_200_OK)
 async def delete_task(task_id: str):
-    task = tasks.get(task_id)
-
-    if not task:
-        return response({"error": "Task not found"}, 404)
-
+    """Delete a task"""
+    if task_id not in tasks:
+        return create_response({"error": "Task not found"}, status.HTTP_404_NOT_FOUND)
+    
     del tasks[task_id]
+    return create_response({"message": "Task deleted successfully"})
 
-    return response({"message": "Task deleted successfully"})
-
-@app.get("/health")
+@app.get("/health", status_code=status.HTTP_200_OK)
 async def health():
-    return response({"status": "healthy"})
-
+    """Health check endpoint"""
+    return create_response({"status": "healthy"})
 
 if __name__ == "__main__":
     import uvicorn

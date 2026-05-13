@@ -270,6 +270,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "fastapi" },
     { name = "flask" },
+    { name = "pydantic" },
     { name = "uvicorn" },
 ]
 
@@ -284,6 +285,7 @@ dev = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.136.1" },
     { name = "flask", specifier = "==3.0.0" },
+    { name = "pydantic", specifier = ">=2.9.0" },
     { name = "uvicorn", specifier = ">=0.46.0" },
 ]
 
