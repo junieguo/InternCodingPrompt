@@ -1,20 +1,41 @@
-FROM astral/uv:latest AS uv_builder
+FROM python:3.11-slim AS builder
 
-FROM python:3.11-slim
+# curl and uv
+RUN apt-get update && apt-get install -y curl && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    apt-get remove -y curl && apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /app
 
-COPY --from=uv_builder /uv /uvx /bin/
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
 
-COPY . .
+# Create venv and install dependencies
+RUN uv venv /opt/venv && \
+    uv pip install --python /opt/venv/bin/python --no-cache-dir fastapi uvicorn[standard] pydantic
 
-# Create virtual environment and add it to PATH
-ENV UV_PROJECT_ENVIRONMENT=/opt/venv
-RUN python3 -m venv $UV_PROJECT_ENVIRONMENT
-ENV PATH="$UV_PROJECT_ENVIRONMENT/bin:$PATH"
+FROM python:3.11-slim
 
-RUN uv sync --locked
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash appuser
 
-EXPOSE 5000
+WORKDIR /app
 
-CMD ["python", "app.py"]
+# Copy venvfrom builder
+COPY --from=builder --chown=appuser:appuser /opt/venv /opt/venv
+
+COPY --chown=appuser:appuser app.py .
+COPY --chown=appuser:appuser api/ ./api/
+
+# Use venv
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONPATH="/app"
+
+USER appuser
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
