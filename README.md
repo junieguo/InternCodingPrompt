@@ -1,5 +1,20 @@
 # Intern Coding Prompt: Flask to FastAPI Migration
 
+## Instructions
+
+### Run with Docker
+```
+docker build -t task-api .
+docker run -p 8000:8000 task-api
+```
+Then run tests
+
+### Run locally
+```
+uv sync
+uv run uvicorn app:app --reload --port 8000
+```
+Then run tests
 ## Overview
 
 This repository contains a simple Flask application with CRUD (Create, Read, Update, Delete) operations for a task management API. Your task is to migrate this application from Flask to FastAPI, utilizing modern package management with `uv`, and ensure it is properly containerized with Docker.
